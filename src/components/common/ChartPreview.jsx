@@ -35,7 +35,7 @@ export default function ChartPreview() {
             View the Data
           </NavLink>
           <button
-            onClick={downloadCSV} // Replace with the actual download URL if different
+            onClick={downloadCSV} 
             download
             className="bg-[#84866b] text-white px-4 py-2 font-semibold shadow hover:bg-[#6f725b] transition"
           >

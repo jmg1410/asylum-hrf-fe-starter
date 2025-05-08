@@ -12,21 +12,33 @@ const AppContext = createContext({});
  * - Populate the graphs with the stored data
  */
 const useAppContextProvider = () => {
-  const [graphData, setGraphData] = useState(testData);
+  const [graphData, setGraphData] = useState({
+    yearResults: [],
+    citizenshipResults: []
+  });
   const [isDataLoading, setIsDataLoading] = useState(false);
 
   useLocalStorage({ graphData, setGraphData });
 
-  const getFiscalData = () => {
+  const getFiscalData = async () => {
     // TODO: Replace this with functionality to retrieve the data from the fiscalSummary endpoint
-    const fiscalDataRes = testData;
-    return fiscalDataRes;
+    try {
+      const response = await axios.get('https://asylum-be.onrender.com/fiscalSummary')
+      return response.data
+    } catch (error) {
+      console.log('failed to fetch fiscal data',error)
+      return []
+    }
   };
 
   const getCitizenshipResults = async () => {
-    // TODO: Replace this with functionality to retrieve the data from the citizenshipSummary endpoint
-    const citizenshipRes = testData.citizenshipResults;
-    return citizenshipRes;
+    try {
+    const response = await axios.get('https://asylum-be.onrender.com/citizenshipSummary');
+    return response.data
+    } catch (error) {
+     console.log('failed to fetch citizenship data', error)
+     return []
+    }
   };
 
   const updateQuery = async () => {
@@ -35,6 +47,27 @@ const useAppContextProvider = () => {
 
   const fetchData = async () => {
     // TODO: fetch all the required data and set it to the graphData state
+    try {
+    const fiscalData = await getFiscalData();
+    const citizenshipData = await getCitizenshipResults();
+
+    const cleanedData = {
+      yearResults:Array.isArray(fiscalData) ? fiscalData : [],
+      citizenshipData: Array.isArray(citizenshipData) ? citizenshipData : [],
+    }
+    setGraphData({
+      yearResults: fiscalData.yearResults,
+      citizenshipResults: citizenshipData
+    })
+    } catch (error) {
+     console.log('Failed to set chart', error);
+     setGraphData({
+      yearResults: [],
+      citizenshipResults: []
+     })
+    } finally {
+      setIsDataLoading(false)
+    }
   };
 
   const clearQuery = () => {
